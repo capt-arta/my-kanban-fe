@@ -217,6 +217,20 @@ const KanbanBoard = () => {
         }
     }
 
+    const deleteTaskData = async (id) => {
+        setLoading(true);
+        try {
+            await axios.delete(`http://127.0.0.1:8000/api/task/${id}` );
+            setTimeout(() => {
+                fetchData();
+                setModalEditOpen(false);
+                setLoading(false);
+            }, 500);
+        } catch (error) {
+            console.error('An error occurred:', error);
+        }
+    }
+
     const handleEditTask = (values)=>{
         const [startDate, endDate] = values.date || [];
 
@@ -267,6 +281,11 @@ const KanbanBoard = () => {
         console.log(finalData);
         setModalCreateOpen(false);
     };
+
+    const handleDeleteTask = (id)=>{
+        console.log({id});
+        deleteTaskData(id);
+    }
 
     useEffect(() => {
         fetchData();
@@ -360,16 +379,23 @@ const KanbanBoard = () => {
                             <RangePicker disabled={!editMode} className='w-full' defaultValue={[detailTask?.start_date, detailTask?.end_date]} placeholder={[detailTask?.start_date, detailTask?.end_date]} />
                         </Form.Item>
 
-                        <div className='pt-6 flex gap-4 justify-end h-fit'>
+                        <div className='pt-6 flex gap-4 justify-between h-fit'>
+                            <div>
                             <Form.Item>
-                                <Button onClick={handleCancel} >Cancel</Button>
-                            </Form.Item>
-                            {!editMode && <Form.Item >
-                                <Button onClick={()=>setEditMode(true)} >Edit</Button>
-                            </Form.Item>}
-                            {editMode && <Form.Item >
-                                <Button type="primary" style={{ backgroundColor: '#1677ff' }} htmlType='submit'>Submit</Button>
-                            </Form.Item>}
+                                    <Button type='primary' danger onClick={()=>{handleDeleteTask(detailTask.id)}} >Delete</Button>
+                                </Form.Item>
+                            </div>
+                            <div className='flex gap-4'>
+                                <Form.Item>
+                                    <Button onClick={handleCancel} >Cancel</Button>
+                                </Form.Item>
+                                {!editMode && <Form.Item >
+                                    <Button onClick={()=>setEditMode(true)} >Edit</Button>
+                                </Form.Item>}
+                                {editMode && <Form.Item >
+                                    <Button type="primary" style={{ backgroundColor: '#1677ff' }} htmlType='submit'>Submit</Button>
+                                </Form.Item>}
+                            </div>
                         </div>
                     </Form>
                 </Modal>
