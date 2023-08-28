@@ -28,7 +28,7 @@ const List = () => {
     } catch (error) {
         console.error('An error occurred:', error);
     }
-};
+  };
 
   useEffect(() => {
     fetchData()
