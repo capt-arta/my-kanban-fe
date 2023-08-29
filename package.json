@@ -12,6 +12,7 @@
     "antd": "^5.8.4",
     "autoprefixer": "^10.4.15",
     "axios": "^1.5.0",
+    "dayjs": "^1.11.9",
     "eslint": "8.47.0",
     "eslint-config-next": "13.4.19",
     "gantt-task-react": "^0.3.9",

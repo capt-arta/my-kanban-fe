@@ -5,7 +5,10 @@ import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import Loading from '../Loading';
 import axios from 'axios';
 import { Button, Modal, Form, Input, DatePicker } from 'antd';
+import { ExclamationCircleFilled } from '@ant-design/icons';
 import moment from 'moment/moment';
+import dayjs from 'dayjs';
+const { confirm } = Modal;
 
 const itemsFromBackend = [
     {
@@ -92,10 +95,10 @@ const KanbanBoard = () => {
     // const isServer = typeof window === 'undefined';
     // console.log({isServer});
 
-    console.log({editMode});
+    // console.log({editMode});
 
     const onDragEnd = (result, columns, setColumns) => {
-        console.log({result, columns, setColumns});
+        // console.log({result, columns, setColumns});
         if (!result.destination) return;
         const { source, destination } = result;
 
@@ -170,6 +173,8 @@ const KanbanBoard = () => {
     const handleCancel = () => {
         setModalCreateOpen(false);
         setModalEditOpen(false);
+        setEditMode(false);
+        setDetailTask(null)
         setClickedTask(null);
     };
 
@@ -188,7 +193,7 @@ const KanbanBoard = () => {
         setModalEditOpen(true)
     }
 
-    console.log(detailTask);
+    // console.log(detailTask);
 
 
     const createTaskData = async (data) => {
@@ -242,24 +247,33 @@ const KanbanBoard = () => {
         const formattedEndDate = parsedEndDate ? parsedEndDate.format('YYYY-MM-DD') : null;
 
         // Create a new object with only defined properties
-        const finalData = {
+        const updateData = {
             ...values,
             ...(formattedStartDate !== undefined && { start_date: formattedStartDate }),
             ...(formattedEndDate !== undefined && { end_date: formattedEndDate }),
         };
 
-        delete finalData.date;
+        delete updateData.date;
 
-        // Remove keys with undefined values from finalData
-        for (const key in finalData) {
-            if (finalData.hasOwnProperty(key) && finalData[key] === undefined) {
-                delete finalData[key];
+        // Remove keys with undefined values from updateData
+        for (const key in updateData) {
+            if ((updateData.hasOwnProperty(key) && updateData[key]) === undefined || (updateData.hasOwnProperty(key) && updateData[key]) === null ) {
+                delete updateData[key];
             }
         }
 
+        const finalData = {
+            ...detailTask,
+            ...updateData
+        };
+
         editTaskData(finalData);
-        console.log(finalData);
+        // console.log("update", finalData, updateData, detailTask);
         setEditMode(false);
+        setTimeout(() => {
+            fetchData();
+            setModalEditOpen(false);
+        }, 500);
     }
 
     const handleCreateTask = (values) => {
@@ -283,7 +297,7 @@ const KanbanBoard = () => {
     };
 
     const handleDeleteTask = (id)=>{
-        console.log({id});
+        // console.log({id});
         deleteTaskData(id);
     }
 
@@ -294,7 +308,24 @@ const KanbanBoard = () => {
         }, 500);
     }, []);
 
-    console.log({ columns, clickedTask });
+    const showDeleteConfirm = (id) => {
+        confirm({
+          title: 'Are you sure delete this task?',
+          icon: <ExclamationCircleFilled />,
+          content: 'Some descriptions',
+          okText: 'Yes',
+          okType: 'danger',
+          cancelText: 'No',
+          onOk() {
+            handleDeleteTask(id);
+          },
+          onCancel() {
+            handleCancel;
+          },
+        });
+      };
+
+    // console.log({ columns, clickedTask });
 
     return loading && columns ? (
         <Loading />
@@ -327,13 +358,13 @@ const KanbanBoard = () => {
                                 },
                             ]}
                         >
-                            <Input />
+                            <Input autoComplete='off' />
                         </Form.Item>
                         <Form.Item name='description' label='Description'>
-                            <Input type='textarea' />
+                            <Input type='textarea'  autoComplete='off' />
                         </Form.Item>
                         <Form.Item name='person' label='Person'>
-                            <Input type='textarea' />
+                            <Input type='textarea' autoComplete='off' />
                         </Form.Item>
                         <Form.Item name='date' label='Date' rules={[
                                 {
@@ -381,8 +412,8 @@ const KanbanBoard = () => {
 
                         <div className='pt-6 flex gap-4 justify-between h-fit'>
                             <div>
-                            <Form.Item>
-                                    <Button type='primary' danger onClick={()=>{handleDeleteTask(detailTask.id)}} >Delete</Button>
+                                <Form.Item>
+                                    <Button type='primary' danger onClick={()=>{showDeleteConfirm(detailTask.id)}} >Delete</Button>
                                 </Form.Item>
                             </div>
                             <div className='flex gap-4'>

@@ -30,7 +30,7 @@ const GanttChart = () => {
   function parseDateString(dateString) {
     const dateObj = new Date(dateString);
     const year = dateObj.getFullYear();
-    const month = dateObj.getMonth() + 1; // Month is zero-based, so add 1
+    const month = dateObj.getMonth();
     const day = dateObj.getDate();
   
     return  {year, month, day};
@@ -39,6 +39,7 @@ const GanttChart = () => {
   const formattedTasks = data.map((task) => {
     const startDate = parseDateString(task.start_date);
     const endDate = parseDateString(task.end_date);
+    console.log({startDate, endDate});
     return {
       id: task.id,
       name: task.name,
@@ -51,7 +52,7 @@ const GanttChart = () => {
     }
   });
   
-  console.log({data, formattedTasks});
+  // console.log({data, formattedTasks});
   return (
     <div className='w-full flex flex-col'>
         <h1>Gantt Chart</h1>
