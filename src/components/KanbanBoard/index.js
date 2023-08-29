@@ -90,8 +90,9 @@ const KanbanBoard = () => {
     const [modalCreateOpen, setModalCreateOpen] = useState(false);
     const [modalEditOpen, setModalEditOpen] = useState(false);
     const [editMode, setEditMode] = useState(false);
+    const [initialFormValues, setInitialFormValues] = useState(null);
     const [form] = Form.useForm();
-    const {RangePicker} = DatePicker;
+    const { RangePicker } = DatePicker;
     // const isServer = typeof window === 'undefined';
     // console.log({isServer});
 
@@ -159,7 +160,7 @@ const KanbanBoard = () => {
         try {
             const response = await axios.get('http://127.0.0.1:8000/api/task');
             const fetchedData = response.data.data;
-            setTaskData(fetchedData);
+            // setTaskData(fetchedData);
             setColumns(fetchedData);
         } catch (error) {
             console.error('An error occurred:', error);
@@ -168,7 +169,7 @@ const KanbanBoard = () => {
 
     const showModal = () => {
         setModalCreateOpen(true);
-    };  
+    };
 
     const handleCancel = () => {
         setModalCreateOpen(false);
@@ -179,22 +180,97 @@ const KanbanBoard = () => {
     };
 
     const detailTaskData = async (id) => {
+        setLoading(true);
         try {
-            const response = await axios.get(`http://127.0.0.1:8000/api/task/${id}`);
+            const response = await axios.get(`http://127.0.0.1:8000/api /task/${id}`);
             setDetailTask(response.data.data);
+            // const {start_date, end_date,status, name, description, sub_task, person } = response.data.data;
+            // const responData = response.data.data;
+
+            setTimeout(() => {
+                setLoading(false)
+            }, 300);
         } catch (error) {
             console.error('An error occurred:', error);
         }
-    }
+    };
 
-    const handleModalEdit = (val) => {
-        detailTaskData(val.id);
-        setClickedTask(val)
-        setModalEditOpen(true)
-    }
+    // const handleModalEdit = async (val) => {
+    //     // await detailTaskData(val.id);
+    //     // setClickedTask(val)
+    //     // setModalEditOpen(true)
+    //     setLoading(true);
+    //     try {
+    //         const response = await axios.get(`http://127.0.0.1:8000/api/task/${val.id}`);
+    //         const fetchedDetailTask = response.data.data;
+    //         setClickedTask(val);
+    //         setDetailTask(fetchedDetailTask);
+    //         setModalEditOpen(true);
+    //         setEditMode(false);
+            
+    //         const { start_date, end_date, description, name, person } = fetchedDetailTask;
+    //         form.setFieldsValue({
+    //             date: [moment(start_date), moment(end_date)],
+    //             description: description,
+    //             name: name,
+    //             person: person
+    //         });
 
-    // console.log(detailTask);
+    //         setLoading(false);
+    //     } catch (error) {
+    //         console.error('An error occurred:', error);
+    //         setLoading(false);
+    //     }
+    // }
 
+    const handleModalEdit = async (val) => {
+        setLoading(true);
+        try {
+            const response = await axios.get(`http://127.0.0.1:8000/api/task/${val.id}`);
+            const fetchedDetailTask = response.data.data;
+            console.log({
+                date: [dayjs(fetchedDetailTask.start_date), dayjs(fetchedDetailTask.end_date)],
+                description: fetchedDetailTask.description,
+                name: fetchedDetailTask.name,
+                person: fetchedDetailTask.person
+            }, 'response');
+            form.setFieldsValue({
+                date: [dayjs(fetchedDetailTask.start_date), dayjs(fetchedDetailTask.end_date)],
+                description: fetchedDetailTask.description,
+                name: fetchedDetailTask.name,
+                person: fetchedDetailTask.person
+            });
+            setClickedTask(val);
+            setDetailTask(fetchedDetailTask);
+            setModalEditOpen(true);
+            setEditMode(false);
+            
+            // Store the initial form values in the state
+            // const { start_date, end_date, description, name, person } = fetchedDetailTask;
+            // setInitialFormValues({
+            //     date: [moment(start_date), moment(end_date)],
+            //     description: description,
+            //     name: name,
+            //     person: person
+            // });
+
+    
+            setLoading(false);
+        } catch (error) {
+            console.error('An error occurred:', error);
+            setLoading(false);
+        }
+    };
+
+    console.log({initialFormValues});
+
+    // useEffect(() => {
+    //     if (modalEditOpen && detailTask) {
+    //         form.setFieldsValue(initialFormValues);
+    //     }
+    // }, [modalEditOpen, detailTask, form, initialFormValues]);
+
+    console.log(detailTask, 'detailTask');
 
     const createTaskData = async (data) => {
         setLoading(true);
@@ -212,7 +288,7 @@ const KanbanBoard = () => {
     const editTaskData = async (data) => {
         setLoading(true);
         try {
-            await axios.put(`http://127.0.0.1:8000/api/task/${clickedTask.id}`, data );
+            await axios.put(`http://127.0.0.1:8000/api/task/${clickedTask.id}`, data);
             await detailTaskData(clickedTask.id)
             setTimeout(() => {
                 setLoading(false);
@@ -225,7 +301,7 @@ const KanbanBoard = () => {
     const deleteTaskData = async (id) => {
         setLoading(true);
         try {
-            await axios.delete(`http://127.0.0.1:8000/api/task/${id}` );
+            await axios.delete(`http://127.0.0.1:8000/api/task/${id}`);
             setTimeout(() => {
                 fetchData();
                 setModalEditOpen(false);
@@ -236,11 +312,11 @@ const KanbanBoard = () => {
         }
     }
 
-    const handleEditTask = (values)=>{
+    const handleEditTask = (values) => {
         const [startDate, endDate] = values.date || [];
 
-        const parsedStartDate = startDate ? moment(startDate) : null;
-        const parsedEndDate = endDate ? moment(endDate) : null;
+        const parsedStartDate = startDate ? moment(startDate, 'YYYY-MM-DD') : null;
+        const parsedEndDate = endDate ? moment(endDate, 'YYYY-MM-DD') : null;
 
         // Format the parsed date objects to 'YYYY-MM-DD' format
         const formattedStartDate = parsedStartDate ? parsedStartDate.format('YYYY-MM-DD') : null;
@@ -257,7 +333,7 @@ const KanbanBoard = () => {
 
         // Remove keys with undefined values from updateData
         for (const key in updateData) {
-            if ((updateData.hasOwnProperty(key) && updateData[key]) === undefined || (updateData.hasOwnProperty(key) && updateData[key]) === null ) {
+            if ((updateData.hasOwnProperty(key) && updateData[key]) === undefined || (updateData.hasOwnProperty(key) && updateData[key]) === null) {
                 delete updateData[key];
             }
         }
@@ -280,8 +356,8 @@ const KanbanBoard = () => {
         const [startDate, endDate] = values.date;
 
         // Format start and end dates as YYYY-MM-DD strings
-        const formattedStartDate = startDate.toISOString().split('T')[0];
-        const formattedEndDate = endDate.toISOString().split('T')[0];
+        const formattedStartDate = moment(startDate.toISOString()).format('YYYY-MM-DD');
+        const formattedEndDate = moment(endDate.toISOString()).format('YYYY-MM-DD');
 
         // Update the values object with formatted dates
         const finalData = {
@@ -296,7 +372,7 @@ const KanbanBoard = () => {
         setModalCreateOpen(false);
     };
 
-    const handleDeleteTask = (id)=>{
+    const handleDeleteTask = (id) => {
         // console.log({id});
         deleteTaskData(id);
     }
@@ -306,24 +382,24 @@ const KanbanBoard = () => {
         setTimeout(() => {
             setLoading();
         }, 500);
-    }, []);
+    }, [loading]);
 
     const showDeleteConfirm = (id) => {
         confirm({
-          title: 'Are you sure delete this task?',
-          icon: <ExclamationCircleFilled />,
-          content: 'Some descriptions',
-          okText: 'Yes',
-          okType: 'danger',
-          cancelText: 'No',
-          onOk() {
-            handleDeleteTask(id);
-          },
-          onCancel() {
-            handleCancel;
-          },
+            title: 'Are you sure delete this task?',
+            icon: <ExclamationCircleFilled />,
+            content: 'Some descriptions',
+            okText: 'Yes',
+            okType: 'danger',
+            cancelText: 'No',
+            onOk() {
+                handleDeleteTask(id);
+            },
+            onCancel() {
+                handleCancel;
+            },
         });
-      };
+    };
 
     // console.log({ columns, clickedTask });
 
@@ -344,9 +420,9 @@ const KanbanBoard = () => {
                     title='Add Task'
                     open={modalCreateOpen}
                     onCancel={handleCancel}
-                    footer = {null}
+                    footer={null}
                 >
-                    <Form form={form} layout='vertical' onFinish={handleCreateTask }>
+                    <Form form={form} layout='vertical' onFinish={handleCreateTask}>
                         <Form.Item
                             label='Title'
                             name='name'
@@ -361,19 +437,19 @@ const KanbanBoard = () => {
                             <Input autoComplete='off' />
                         </Form.Item>
                         <Form.Item name='description' label='Description'>
-                            <Input type='textarea'  autoComplete='off' />
+                            <Input type='textarea' autoComplete='off' />
                         </Form.Item>
                         <Form.Item name='person' label='Person'>
                             <Input type='textarea' autoComplete='off' />
                         </Form.Item>
                         <Form.Item name='date' label='Date' rules={[
-                                {
-                                    required: true,
-                                    message:
-                                        'Please input the date range!',
-                                },
-                            ]}>
-                            <RangePicker className='w-full'/>
+                            {
+                                required: true,
+                                message:
+                                    'Please input the date range!',
+                            },
+                        ]}>
+                            <RangePicker className='w-full' />
                         </Form.Item>
 
                         <div className='pt-6 flex gap-4 justify-end h-fit'>
@@ -391,29 +467,29 @@ const KanbanBoard = () => {
                     title='Task'
                     open={modalEditOpen}
                     onCancel={handleCancel}
-                    footer = {null}
+                    footer={null}
                 >
                     <Form form={form} layout='vertical' onFinish={handleEditTask} >
                         <Form.Item
                             label='Title'
                             name='name'
                         >
-                            <Input autoComplete='off' disabled={!editMode} defaultValue={detailTask?.name} placeholder={detailTask?.name}/>
+                            <Input autoComplete='off' disabled={!editMode} placeholder={detailTask?.name} />
                         </Form.Item>
                         <Form.Item name='description' label='Description'>
-                            <Input autoComplete='off' disabled={!editMode} type='textarea' defaultValue={detailTask?.description} placeholder={detailTask?.description} />
+                            <Input autoComplete='off' disabled={!editMode} type='textarea' placeholder={detailTask?.description} />
                         </Form.Item>
                         <Form.Item name='person' label='Person'>
-                            <Input autoComplete='off' disabled={!editMode} defaultValue={detailTask?.person} placeholder={detailTask?.person} />
+                            <Input autoComplete='off' disabled={!editMode} placeholder={detailTask?.person} />
                         </Form.Item>
                         <Form.Item name='date' label='Date'>
-                            <RangePicker disabled={!editMode} className='w-full' defaultValue={[detailTask?.start_date, detailTask?.end_date]} placeholder={[detailTask?.start_date, detailTask?.end_date]} />
+                            <RangePicker disabled={!editMode} className='w-full' />
                         </Form.Item>
 
                         <div className='pt-6 flex gap-4 justify-between h-fit'>
                             <div>
                                 <Form.Item>
-                                    <Button type='primary' danger onClick={()=>{showDeleteConfirm(detailTask.id)}} >Delete</Button>
+                                    <Button type='primary' danger onClick={() => { showDeleteConfirm(detailTask.id) }} >Delete</Button>
                                 </Form.Item>
                             </div>
                             <div className='flex gap-4'>
@@ -421,7 +497,7 @@ const KanbanBoard = () => {
                                     <Button onClick={handleCancel} >Cancel</Button>
                                 </Form.Item>
                                 {!editMode && <Form.Item >
-                                    <Button onClick={()=>setEditMode(true)} >Edit</Button>
+                                    <Button onClick={() => setEditMode(true)} >Edit</Button>
                                 </Form.Item>}
                                 {editMode && <Form.Item >
                                     <Button type="primary" style={{ backgroundColor: '#1677ff' }} htmlType='submit'>Submit</Button>
@@ -504,12 +580,13 @@ const KanbanBoard = () => {
                                                                         ) => {
                                                                             return (
                                                                                 <div
-                                                                                    onClick={()=> handleModalEdit(item)}
-                                                                                    className={`flex rounded-sm ${
-                                                                                        snapshot.isDragging
+                                                                                    onClick={() => {
+                                                                                        handleModalEdit(item)
+                                                                                    }}
+                                                                                    className={`flex rounded-md border-2 border-[#000000] ${snapshot.isDragging
                                                                                             ? 'rotate-2'
                                                                                             : 'rotate-0'
-                                                                                    }`}
+                                                                                        }`}
                                                                                     ref={
                                                                                         provided.innerRef
                                                                                     }
@@ -546,7 +623,7 @@ const KanbanBoard = () => {
                                                                                             className={`px-2 py-1 font-light text-xs rounded-md w-fit`}
                                                                                             style={{
                                                                                                 backgroundColor:
-                                                                                                snapshot.isDragging ? 'white' : color,
+                                                                                                    snapshot.isDragging ? 'white' : color,
                                                                                             }}
                                                                                         >
                                                                                             {
