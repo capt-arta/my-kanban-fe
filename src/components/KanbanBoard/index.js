@@ -292,7 +292,7 @@ const KanbanBoard = () => {
         delete finalData.date;
 
         createTaskData(finalData);
-        console.log(finalData);
+        // console.log(finalData);
         setModalCreateOpen(false);
     };
 
@@ -398,13 +398,13 @@ const KanbanBoard = () => {
                             label='Title'
                             name='name'
                         >
-                            <Input disabled={!editMode} defaultValue={detailTask?.name} placeholder={detailTask?.name}/>
+                            <Input autoComplete='off' disabled={!editMode} defaultValue={detailTask?.name} placeholder={detailTask?.name}/>
                         </Form.Item>
                         <Form.Item name='description' label='Description'>
-                            <Input disabled={!editMode} type='textarea' defaultValue={detailTask?.description} placeholder={detailTask?.description} />
+                            <Input autoComplete='off' disabled={!editMode} type='textarea' defaultValue={detailTask?.description} placeholder={detailTask?.description} />
                         </Form.Item>
                         <Form.Item name='person' label='Person'>
-                            <Input disabled={!editMode} defaultValue={detailTask?.person} placeholder={detailTask?.person} />
+                            <Input autoComplete='off' disabled={!editMode} defaultValue={detailTask?.person} placeholder={detailTask?.person} />
                         </Form.Item>
                         <Form.Item name='date' label='Date'>
                             <RangePicker disabled={!editMode} className='w-full' defaultValue={[detailTask?.start_date, detailTask?.end_date]} placeholder={[detailTask?.start_date, detailTask?.end_date]} />
