@@ -583,7 +583,7 @@ const KanbanBoard = () => {
                                                                                     onClick={() => {
                                                                                         handleModalEdit(item)
                                                                                     }}
-                                                                                    className={`flex rounded-md border-2 border-[#000000] ${snapshot.isDragging
+                                                                                    className={`flex rounded-md ${snapshot.isDragging
                                                                                             ? 'rotate-2'
                                                                                             : 'rotate-0'
                                                                                         }`}

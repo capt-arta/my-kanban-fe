@@ -8,20 +8,6 @@ import React, { useEffect, useState } from 'react'
 const GanttChart = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [initialValue, setInitialValue] = useState(['2023-08-10', '2023-08-20']);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const showModal = () => {
-    setIsModalOpen(true);
-  };
-  const handleOk = () => {
-    setIsModalOpen(false);
-  };
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
-  const [form] = Form.useForm();
-  const { RangePicker } = DatePicker;
-
 
   const fetchData = async () => {
     setLoading(true);
@@ -41,14 +27,6 @@ const GanttChart = () => {
     fetchData()
   }, [])
 
-  useEffect(()=>{
-    if (isModalOpen && initialValue) {
-      form.setFieldsValue(initialValue)
-    }
-  }, [initialValue, isModalOpen]);
-
-  console.log('getvalue' ,form.getFieldsValue());
-
 
   function parseDateString(dateString) {
     const dateObj = new Date(dateString);
@@ -59,7 +37,7 @@ const GanttChart = () => {
     return { year, month, day };
   }
 
-  const formattedTasks = data.map((task) => {
+  const formattedTasks = data?.map((task) => {
     const startDate = parseDateString(task.start_date);
     const endDate = parseDateString(task.end_date);
     return {
@@ -68,13 +46,12 @@ const GanttChart = () => {
       start: new Date(startDate.year, startDate.month, startDate.day),
       end: new Date(endDate.year, endDate.month, endDate.day),
       type: 'task',
-      progress: 45,
+      progress: 100,
       isDisabled: true,
-      styles: { progressColor: '#ffbb54', progressSelectedColor: '#ff9e0d' },
+      styles: { progressColor: '#1677ff', progressSelectedColor: '#8ebdff', todayColor: "#f8b444" },
     }
   });
-
-  console.log('initialValue', initialValue);
+  
   return (
     <div className='w-full flex flex-col'>
       <h1>Gantt Chart</h1>
@@ -82,16 +59,6 @@ const GanttChart = () => {
         {!loading && <Gantt tasks={formattedTasks} />}
       </div>
       <div>
-      <Button type="primary" onClick={showModal}>
-        Open Modal
-      </Button>
-      <Modal title="Basic Modal" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
-        <Form form={form} layout='vertical' onFinish={()=>{}}>
-          <Form.Item name='date' label='Date'>
-            <RangePicker className='w-full' />
-          </Form.Item>
-        </Form>
-      </Modal>
       </div>
     </div>
   )
