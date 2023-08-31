@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import Loading from '../Loading';
 import axios from 'axios';
-import { Button, Modal, Form, Input, DatePicker } from 'antd';
+import { Button, Modal, Form, Input, DatePicker, message } from 'antd';
 import { ExclamationCircleFilled } from '@ant-design/icons';
 import moment from 'moment/moment';
 import dayjs from 'dayjs';
@@ -84,57 +84,12 @@ const KanbanBoard = () => {
     // console.log('kanban online');
     const [columns, setColumns] = useState(columnsFromBackend);
     const [loading, setLoading] = useState(true);
-    const [taskData, setTaskData] = useState([]);
-    const [clickedTask, setClickedTask] = useState(null);
     const [detailTask, setDetailTask] = useState(null);
     const [modalCreateOpen, setModalCreateOpen] = useState(false);
     const [modalEditOpen, setModalEditOpen] = useState(false);
     const [editMode, setEditMode] = useState(false);
-    const [initialFormValues, setInitialFormValues] = useState(null);
     const [form] = Form.useForm();
     const { RangePicker } = DatePicker;
-    // const isServer = typeof window === 'undefined';
-    // console.log({isServer});
-
-    // console.log({editMode});
-
-    const onDragEnd = (result, columns, setColumns) => {
-        // console.log({result, columns, setColumns});
-        if (!result.destination) return;
-        const { source, destination } = result;
-
-        if (source.droppableId !== destination.droppableId) {
-            const sourceColumn = columns[source.droppableId];
-            const destColumn = columns[destination.droppableId];
-            const sourceItems = [...sourceColumn.items];
-            const destItems = [...destColumn.items];
-            const [removed] = sourceItems.splice(source.index, 1);
-            destItems.splice(destination.index, 0, removed);
-            setColumns({
-                ...columns,
-                [source.droppableId]: {
-                    ...sourceColumn,
-                    items: sourceItems,
-                },
-                [destination.droppableId]: {
-                    ...destColumn,
-                    items: destItems,
-                },
-            });
-        } else {
-            const column = columns[source.droppableId];
-            const copiedItems = [...column.items];
-            const [removed] = copiedItems.splice(source.index, 1);
-            copiedItems.splice(destination.index, 0, removed);
-            setColumns({
-                ...columns,
-                [source.droppableId]: {
-                    ...column,
-                    items: copiedItems,
-                },
-            });
-        }
-    };
 
     const boardCheck = (val) => {
         // console.log(val);
@@ -176,7 +131,6 @@ const KanbanBoard = () => {
         setModalEditOpen(false);
         setEditMode(false);
         setDetailTask(null)
-        setClickedTask(null);
         form.resetFields();
     };
 
@@ -185,9 +139,6 @@ const KanbanBoard = () => {
         try {
             const response = await axios.get(`http://127.0.0.1:8000/api /task/${id}`);
             setDetailTask(response.data.data);
-            // const {start_date, end_date,status, name, description, sub_task, person } = response.data.data;
-            // const responData = response.data.data;
-
             setTimeout(() => {
                 setLoading(false)
             }, 300);
@@ -195,34 +146,6 @@ const KanbanBoard = () => {
             console.error('An error occurred:', error);
         }
     };
-
-    // const handleModalEdit = async (val) => {
-    //     // await detailTaskData(val.id);
-    //     // setClickedTask(val)
-    //     // setModalEditOpen(true)
-    //     setLoading(true);
-    //     try {
-    //         const response = await axios.get(`http://127.0.0.1:8000/api/task/${val.id}`);
-    //         const fetchedDetailTask = response.data.data;
-    //         setClickedTask(val);
-    //         setDetailTask(fetchedDetailTask);
-    //         setModalEditOpen(true);
-    //         setEditMode(false);
-            
-    //         const { start_date, end_date, description, name, person } = fetchedDetailTask;
-    //         form.setFieldsValue({
-    //             date: [moment(start_date), moment(end_date)],
-    //             description: description,
-    //             name: name,
-    //             person: person
-    //         });
-
-    //         setLoading(false);
-    //     } catch (error) {
-    //         console.error('An error occurred:', error);
-    //         setLoading(false);
-    //     }
-    // }
 
     const handleModalEdit = async (val) => {
         setLoading(true);
@@ -241,37 +164,15 @@ const KanbanBoard = () => {
                 name: fetchedDetailTask.name,
                 person: fetchedDetailTask.person
             });
-            setClickedTask(val);
             setDetailTask(fetchedDetailTask);
             setModalEditOpen(true);
-            setEditMode(false);
-            
-            // Store the initial form values in the state
-            // const { start_date, end_date, description, name, person } = fetchedDetailTask;
-            // setInitialFormValues({
-            //     date: [moment(start_date), moment(end_date)],
-            //     description: description,
-            //     name: name,
-            //     person: person
-            // });
 
-    
             setLoading(false);
         } catch (error) {
             console.error('An error occurred:', error);
             setLoading(false);
         }
     };
-
-    console.log({initialFormValues});
-
-    // useEffect(() => {
-    //     if (modalEditOpen && detailTask) {
-    //         form.setFieldsValue(initialFormValues);
-    //     }
-    // }, [modalEditOpen, detailTask, form, initialFormValues]);
-
-    console.log(detailTask, 'detailTask');
 
     const createTaskData = async (data) => {
         setLoading(true);
@@ -281,21 +182,34 @@ const KanbanBoard = () => {
                 fetchData();
                 setLoading(false);
             }, 500);
+            message.success('Data Created!');
         } catch (error) {
             console.error('An error occurred:', error);
+            message.error(error)
         }
     }
 
     const editTaskData = async (data) => {
         setLoading(true);
         try {
-            await axios.put(`http://127.0.0.1:8000/api/task/${clickedTask.id}`, data);
-            await detailTaskData(clickedTask.id)
+            await axios.put(`http://127.0.0.1:8000/api/task/${detailTask.id}`, data);
             setTimeout(() => {
                 setLoading(false);
             }, 500);
+            message.success('Data Updated!');
         } catch (error) {
             console.error('An error occurred:', error);
+            message.error(error)
+        }
+    }
+
+    const kanbanDragEnd = async (id,data) => {
+        try {
+            await axios.put(`http://127.0.0.1:8000/api/task/${id}`, data);
+            // message.success('Data Updated!');
+        } catch (error) {
+            console.error('An error occurred:', error);
+            // message.error(error)
         }
     }
 
@@ -305,62 +219,41 @@ const KanbanBoard = () => {
             await axios.delete(`http://127.0.0.1:8000/api/task/${id}`);
             setTimeout(() => {
                 fetchData();
-                setModalEditOpen(false);
+                handleCancel
                 setLoading(false);
             }, 500);
+            message.info('Data Deleted!');
         } catch (error) {
             console.error('An error occurred:', error);
+            message.error(error);
         }
     }
 
     const handleEditTask = (values) => {
-        const [startDate, endDate] = values.date || [];
 
-        const parsedStartDate = startDate ? moment(startDate) : null;
-        const parsedEndDate = endDate ? moment(endDate) : null;
-
-        // Format the parsed date objects to 'YYYY-MM-DD' format
-        const formattedStartDate = parsedStartDate ? parsedStartDate.format('YYYY-MM-DD') : null;
-        const formattedEndDate = parsedEndDate ? parsedEndDate.format('YYYY-MM-DD') : null;
-
-        // Create a new object with only defined properties
-        const updateData = {
-            ...values,
-            ...(formattedStartDate !== undefined && { start_date: formattedStartDate }),
-            ...(formattedEndDate !== undefined && { end_date: formattedEndDate }),
-        };
-
-        delete updateData.date;
-
-        // Remove keys with undefined values from updateData
-        for (const key in updateData) {
-            if ((updateData.hasOwnProperty(key) && updateData[key]) === undefined || (updateData.hasOwnProperty(key) && updateData[key]) === null) {
-                delete updateData[key];
-            }
-        }
-
+        const [startDate, endDate] = values?.date.map((it)=>dayjs(it).format('YYYY-MM-DD'));
         const finalData = {
-            ...detailTask,
-            ...updateData
+            ...values,
+            start_date: startDate,
+            end_date: endDate
         };
-
+        delete finalData.date;
         editTaskData(finalData);
-        // console.log("update", {values},finalData, updateData, detailTask);
-        setEditMode(false);
         setTimeout(() => {
-            fetchData();
             setModalEditOpen(false);
+            setEditMode(false);
+            setDetailTask(null)
+            form.resetFields();
+            fetchData();
         }, 500);
     }
 
     const handleCreateTask = (values) => {
         const [startDate, endDate] = values.date;
 
-        // Format start and end dates as YYYY-MM-DD strings
         const formattedStartDate = moment(startDate.toISOString()).format('YYYY-MM-DD');
         const formattedEndDate = moment(endDate.toISOString()).format('YYYY-MM-DD');
 
-        // Update the values object with formatted dates
         const finalData = {
             ...values,
             start_date: formattedStartDate,
@@ -369,21 +262,19 @@ const KanbanBoard = () => {
         delete finalData.date;
 
         createTaskData(finalData);
-        // console.log(finalData);
         setModalCreateOpen(false);
     };
 
     const handleDeleteTask = (id) => {
-        // console.log({id});
         deleteTaskData(id);
     }
 
     useEffect(() => {
         fetchData();
         setTimeout(() => {
-            setLoading();
+            setLoading(false);
         }, 500);
-    }, [loading]);
+    }, []);
 
     const showDeleteConfirm = (id) => {
         confirm({
@@ -402,7 +293,67 @@ const KanbanBoard = () => {
         });
     };
 
-    // console.log({ columns, clickedTask });
+    
+    const onDragEnd = (result, columns, setColumns) => {
+
+        if (!result.destination) return;
+        const { source, destination } = result;
+        console.log(result, columns, 'dragEnd');
+        let status = "";
+        switch (destination.droppableId) {
+            case '0':
+                status = 'REQUESTED';
+                break;
+            case '1':
+                status = 'TO DO';
+                break;
+            case '2':
+                status = 'IN PROGRESS';
+                break;
+            case '3':
+                status = 'DONE';
+                break;
+            default:
+                break;
+        }
+
+        if (source.droppableId !== destination.droppableId) {
+            const sourceColumn = columns[source.droppableId];
+            const destColumn = columns[destination.droppableId];
+            const sourceItems = [...sourceColumn.items];
+            const destItems = [...destColumn.items];
+            const [removed] = sourceItems.splice(source.index, 1);
+            destItems.splice(destination.index, 0, removed);
+            setColumns({
+                ...columns,
+                [source.droppableId]: {
+                    ...sourceColumn,
+                    items: sourceItems,
+                },
+                [destination.droppableId]: {
+                    ...destColumn,
+                    items: destItems,
+                },
+            });
+            kanbanDragEnd(result.draggableId, {status: status})
+            console.log({id:result.draggableId, data:{status: status}}, 'dragEnddiff');
+        } else {
+            const column = columns[source.droppableId];
+            const copiedItems = [...column.items];
+            const [removed] = copiedItems.splice(source.index, 1);
+            copiedItems.splice(destination.index, 0, removed);
+            setColumns({
+                ...columns,
+                [source.droppableId]: {
+                    ...column,
+                    items: copiedItems,
+                },
+            });
+            console.log(copiedItems,'dragEnd');
+        }
+    };
+
+    console.log({columns, },'dragEnd');
 
     return loading && columns ? (
         <Loading />
@@ -475,13 +426,13 @@ const KanbanBoard = () => {
                             label='Title'
                             name='name'
                         >
-                            <Input autoComplete='off' disabled={!editMode} placeholder={detailTask?.name} />
+                            <Input autoComplete='off' disabled={!editMode} />
                         </Form.Item>
                         <Form.Item name='description' label='Description'>
-                            <Input autoComplete='off' disabled={!editMode} type='textarea' placeholder={detailTask?.description} />
+                            <Input autoComplete='off' disabled={!editMode} type='textarea' />
                         </Form.Item>
                         <Form.Item name='person' label='Person'>
-                            <Input autoComplete='off' disabled={!editMode} placeholder={detailTask?.person} />
+                            <Input autoComplete='off' disabled={!editMode} />
                         </Form.Item>
                         <Form.Item name='date' label='Date'>
                             <RangePicker disabled={!editMode} className='w-full' />
@@ -489,9 +440,9 @@ const KanbanBoard = () => {
 
                         <div className='pt-6 flex gap-4 justify-between h-fit'>
                             <div>
-                                <Form.Item>
+                                {!editMode && <Form.Item>
                                     <Button type='primary' danger onClick={() => { showDeleteConfirm(detailTask.id) }} >Delete</Button>
-                                </Form.Item>
+                                </Form.Item>}
                             </div>
                             <div className='flex gap-4'>
                                 <Form.Item>
