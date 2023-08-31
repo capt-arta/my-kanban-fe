@@ -335,7 +335,12 @@ const KanbanBoard = () => {
                     items: destItems,
                 },
             });
-            kanbanDragEnd(result.draggableId, {status: status})
+
+            // if ((result.draggableId != 0) || (result.draggableId !=  1) || (result.draggableId !=  2) || (result.draggableId !=  3)) {
+            //     return message.error('Not Valid')
+            // } else {
+                kanbanDragEnd(result.draggableId, {status: status})
+            // }
             console.log({id:result.draggableId, data:{status: status}}, 'dragEnddiff');
         } else {
             const column = columns[source.droppableId];
