@@ -177,6 +177,7 @@ const KanbanBoard = () => {
         setEditMode(false);
         setDetailTask(null)
         setClickedTask(null);
+        form.resetFields();
     };
 
     const detailTaskData = async (id) => {
