@@ -315,8 +315,8 @@ const KanbanBoard = () => {
     const handleEditTask = (values) => {
         const [startDate, endDate] = values.date || [];
 
-        const parsedStartDate = startDate ? moment(startDate, 'YYYY-MM-DD') : null;
-        const parsedEndDate = endDate ? moment(endDate, 'YYYY-MM-DD') : null;
+        const parsedStartDate = startDate ? moment(startDate) : null;
+        const parsedEndDate = endDate ? moment(endDate) : null;
 
         // Format the parsed date objects to 'YYYY-MM-DD' format
         const formattedStartDate = parsedStartDate ? parsedStartDate.format('YYYY-MM-DD') : null;
@@ -344,7 +344,7 @@ const KanbanBoard = () => {
         };
 
         editTaskData(finalData);
-        // console.log("update", finalData, updateData, detailTask);
+        // console.log("update", {values},finalData, updateData, detailTask);
         setEditMode(false);
         setTimeout(() => {
             fetchData();
