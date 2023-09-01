@@ -79,7 +79,7 @@ const List = () => {
             color = '#507ccb';
             text = 'To Do';
             break;
-          case 'IN PROGGRESS':
+          case 'IN PROGRESS':
             color = '#f8b444';
             text = 'In Proggress';
             break;

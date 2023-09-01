@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import Loading from '../Loading';
 import axios from 'axios';
-import { Button, Modal, Form, Input, DatePicker, message } from 'antd';
+import { Button, Modal, Form, Input, DatePicker, message, Tag } from 'antd';
 import { ExclamationCircleFilled } from '@ant-design/icons';
 import moment from 'moment/moment';
 import dayjs from 'dayjs';
@@ -130,17 +130,19 @@ const KanbanBoard = () => {
         setModalCreateOpen(false);
         setModalEditOpen(false);
         setEditMode(false);
-        setDetailTask(null)
+        setDetailTask(null);
         form.resetFields();
     };
 
     const detailTaskData = async (id) => {
         setLoading(true);
         try {
-            const response = await axios.get(`http://127.0.0.1:8000/api /task/${id}`);
+            const response = await axios.get(
+                `http://127.0.0.1:8000/api /task/${id}`
+            );
             setDetailTask(response.data.data);
             setTimeout(() => {
-                setLoading(false)
+                setLoading(false);
             }, 300);
         } catch (error) {
             console.error('An error occurred:', error);
@@ -150,19 +152,30 @@ const KanbanBoard = () => {
     const handleModalEdit = async (val) => {
         setLoading(true);
         try {
-            const response = await axios.get(`http://127.0.0.1:8000/api/task/${val.id}`);
+            const response = await axios.get(
+                `http://127.0.0.1:8000/api/task/${val.id}`
+            );
             const fetchedDetailTask = response.data.data;
-            console.log({
-                date: [dayjs(fetchedDetailTask.start_date), dayjs(fetchedDetailTask.end_date)],
-                description: fetchedDetailTask.description,
-                name: fetchedDetailTask.name,
-                person: fetchedDetailTask.person
-            }, 'response');
+            console.log(
+                {
+                    date: [
+                        dayjs(fetchedDetailTask.start_date),
+                        dayjs(fetchedDetailTask.end_date),
+                    ],
+                    description: fetchedDetailTask.description,
+                    name: fetchedDetailTask.name,
+                    person: fetchedDetailTask.person,
+                },
+                'response'
+            );
             form.setFieldsValue({
-                date: [dayjs(fetchedDetailTask.start_date), dayjs(fetchedDetailTask.end_date)],
+                date: [
+                    dayjs(fetchedDetailTask.start_date),
+                    dayjs(fetchedDetailTask.end_date),
+                ],
                 description: fetchedDetailTask.description,
                 name: fetchedDetailTask.name,
-                person: fetchedDetailTask.person
+                person: fetchedDetailTask.person,
             });
             setDetailTask(fetchedDetailTask);
             setModalEditOpen(true);
@@ -185,25 +198,28 @@ const KanbanBoard = () => {
             message.success('Data Created!');
         } catch (error) {
             console.error('An error occurred:', error);
-            message.error(error)
+            message.error(error);
         }
-    }
+    };
 
     const editTaskData = async (data) => {
         setLoading(true);
         try {
-            await axios.put(`http://127.0.0.1:8000/api/task/${detailTask.id}`, data);
+            await axios.put(
+                `http://127.0.0.1:8000/api/task/${detailTask.id}`,
+                data
+            );
             setTimeout(() => {
                 setLoading(false);
             }, 500);
             message.success('Data Updated!');
         } catch (error) {
             console.error('An error occurred:', error);
-            message.error(error)
+            message.error(error);
         }
-    }
+    };
 
-    const kanbanDragEnd = async (id,data) => {
+    const kanbanDragEnd = async (id, data) => {
         try {
             await axios.put(`http://127.0.0.1:8000/api/task/${id}`, data);
             // message.success('Data Updated!');
@@ -211,7 +227,7 @@ const KanbanBoard = () => {
             console.error('An error occurred:', error);
             // message.error(error)
         }
-    }
+    };
 
     const deleteTaskData = async (id) => {
         setLoading(true);
@@ -219,7 +235,7 @@ const KanbanBoard = () => {
             await axios.delete(`http://127.0.0.1:8000/api/task/${id}`);
             setTimeout(() => {
                 fetchData();
-                handleCancel
+                handleCancel;
                 setLoading(false);
             }, 500);
             message.info('Data Deleted!');
@@ -227,32 +243,37 @@ const KanbanBoard = () => {
             console.error('An error occurred:', error);
             message.error(error);
         }
-    }
+    };
 
     const handleEditTask = (values) => {
-
-        const [startDate, endDate] = values?.date.map((it)=>dayjs(it).format('YYYY-MM-DD'));
+        const [startDate, endDate] = values?.date.map((it) =>
+            dayjs(it).format('YYYY-MM-DD')
+        );
         const finalData = {
             ...values,
             start_date: startDate,
-            end_date: endDate
+            end_date: endDate,
         };
         delete finalData.date;
         editTaskData(finalData);
         setTimeout(() => {
             setModalEditOpen(false);
             setEditMode(false);
-            setDetailTask(null)
+            setDetailTask(null);
             form.resetFields();
             fetchData();
         }, 500);
-    }
+    };
 
     const handleCreateTask = (values) => {
         const [startDate, endDate] = values.date;
 
-        const formattedStartDate = moment(startDate.toISOString()).format('YYYY-MM-DD');
-        const formattedEndDate = moment(endDate.toISOString()).format('YYYY-MM-DD');
+        const formattedStartDate = moment(startDate.toISOString()).format(
+            'YYYY-MM-DD'
+        );
+        const formattedEndDate = moment(endDate.toISOString()).format(
+            'YYYY-MM-DD'
+        );
 
         const finalData = {
             ...values,
@@ -267,7 +288,7 @@ const KanbanBoard = () => {
 
     const handleDeleteTask = (id) => {
         deleteTaskData(id);
-    }
+    };
 
     useEffect(() => {
         fetchData();
@@ -293,13 +314,11 @@ const KanbanBoard = () => {
         });
     };
 
-    
     const onDragEnd = (result, columns, setColumns) => {
-
         if (!result.destination) return;
         const { source, destination } = result;
-        console.log(result, columns, 'dragEnd');
-        let status = "";
+        // console.log(result, columns, 'dragEnd');
+        let status = '';
         switch (destination.droppableId) {
             case '0':
                 status = 'REQUESTED';
@@ -339,9 +358,9 @@ const KanbanBoard = () => {
             // if ((result.draggableId != 0) || (result.draggableId !=  1) || (result.draggableId !=  2) || (result.draggableId !=  3)) {
             //     return message.error('Not Valid')
             // } else {
-                kanbanDragEnd(result.draggableId, {status: status})
+            kanbanDragEnd(result.draggableId, { status: status });
             // }
-            console.log({id:result.draggableId, data:{status: status}}, 'dragEnddiff');
+            // console.log({id:result.draggableId, data:{status: status}}, 'dragEnddiff');
         } else {
             const column = columns[source.droppableId];
             const copiedItems = [...column.items];
@@ -354,11 +373,11 @@ const KanbanBoard = () => {
                     items: copiedItems,
                 },
             });
-            console.log(copiedItems,'dragEnd');
+            // console.log(copiedItems,'dragEnd');
         }
     };
 
-    console.log({columns, },'dragEnd');
+    // console.log({columns, },'dragEnd');
 
     return loading && columns ? (
         <Loading />
@@ -379,15 +398,18 @@ const KanbanBoard = () => {
                     onCancel={handleCancel}
                     footer={null}
                 >
-                    <Form form={form} layout='vertical' onFinish={handleCreateTask}>
+                    <Form
+                        form={form}
+                        layout='vertical'
+                        onFinish={handleCreateTask}
+                    >
                         <Form.Item
                             label='Title'
                             name='name'
                             rules={[
                                 {
                                     required: true,
-                                    message:
-                                        'Please input the title!',
+                                    message: 'Please input the title!',
                                 },
                             ]}
                         >
@@ -399,22 +421,31 @@ const KanbanBoard = () => {
                         <Form.Item name='person' label='Person'>
                             <Input type='textarea' autoComplete='off' />
                         </Form.Item>
-                        <Form.Item name='date' label='Date' rules={[
-                            {
-                                required: true,
-                                message:
-                                    'Please input the date range!',
-                            },
-                        ]}>
+                        <Form.Item
+                            name='date'
+                            label='Date'
+                            rules={[
+                                {
+                                    required: true,
+                                    message: 'Please input the date range!',
+                                },
+                            ]}
+                        >
                             <RangePicker className='w-full' />
                         </Form.Item>
 
                         <div className='pt-6 flex gap-4 justify-end h-fit'>
                             <Form.Item>
-                                <Button onClick={handleCancel} >Cancel</Button>
+                                <Button onClick={handleCancel}>Cancel</Button>
                             </Form.Item>
-                            <Form.Item >
-                                <Button type="primary" style={{ backgroundColor: '#1677ff' }} htmlType='submit'>Create</Button>
+                            <Form.Item>
+                                <Button
+                                    type='primary'
+                                    style={{ backgroundColor: '#1677ff' }}
+                                    htmlType='submit'
+                                >
+                                    Create
+                                </Button>
                             </Form.Item>
                         </div>
                     </Form>
@@ -426,39 +457,77 @@ const KanbanBoard = () => {
                     onCancel={handleCancel}
                     footer={null}
                 >
-                    <Form form={form} layout='vertical' onFinish={handleEditTask} >
-                        <Form.Item
-                            label='Title'
-                            name='name'
-                        >
+                    <Form
+                        form={form}
+                        layout='vertical'
+                        onFinish={handleEditTask}
+                    >
+                        <Form.Item label='Title' name='name'>
                             <Input autoComplete='off' disabled={!editMode} />
                         </Form.Item>
                         <Form.Item name='description' label='Description'>
-                            <Input autoComplete='off' disabled={!editMode} type='textarea' />
+                            <Input
+                                autoComplete='off'
+                                disabled={!editMode}
+                                type='textarea'
+                            />
                         </Form.Item>
                         <Form.Item name='person' label='Person'>
                             <Input autoComplete='off' disabled={!editMode} />
                         </Form.Item>
                         <Form.Item name='date' label='Date'>
-                            <RangePicker disabled={!editMode} className='w-full' />
+                            <RangePicker
+                                disabled={!editMode}
+                                className='w-full'
+                            />
                         </Form.Item>
 
                         <div className='pt-6 flex gap-4 justify-between h-fit'>
                             <div>
-                                {!editMode && <Form.Item>
-                                    <Button type='primary' danger onClick={() => { showDeleteConfirm(detailTask.id) }} >Delete</Button>
-                                </Form.Item>}
+                                {!editMode && (
+                                    <Form.Item>
+                                        <Button
+                                            type='primary'
+                                            danger
+                                            onClick={() => {
+                                                showDeleteConfirm(
+                                                    detailTask.id
+                                                );
+                                            }}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </Form.Item>
+                                )}
                             </div>
                             <div className='flex gap-4'>
                                 <Form.Item>
-                                    <Button onClick={handleCancel} >Cancel</Button>
+                                    <Button onClick={handleCancel}>
+                                        Cancel
+                                    </Button>
                                 </Form.Item>
-                                {!editMode && <Form.Item >
-                                    <Button onClick={() => setEditMode(true)} >Edit</Button>
-                                </Form.Item>}
-                                {editMode && <Form.Item >
-                                    <Button type="primary" style={{ backgroundColor: '#1677ff' }} htmlType='submit'>Submit</Button>
-                                </Form.Item>}
+                                {!editMode && (
+                                    <Form.Item>
+                                        <Button
+                                            onClick={() => setEditMode(true)}
+                                        >
+                                            Edit
+                                        </Button>
+                                    </Form.Item>
+                                )}
+                                {editMode && (
+                                    <Form.Item>
+                                        <Button
+                                            type='primary'
+                                            style={{
+                                                backgroundColor: '#1677ff',
+                                            }}
+                                            htmlType='submit'
+                                        >
+                                            Submit
+                                        </Button>
+                                    </Form.Item>
+                                )}
                             </div>
                         </div>
                     </Form>
@@ -507,18 +576,21 @@ const KanbanBoard = () => {
                                                                     : '#ebecf0',
                                                             width: 250,
                                                             height: '60vh',
-                                                            overflow: 'auto'
+                                                            // overflow: 'auto'
                                                         }}
                                                         className='p-2'
                                                     >
                                                         {column.items.map(
                                                             (item, index) => {
-                                                                // console.log('drag',item);
                                                                 const {
                                                                     color,
                                                                     name,
                                                                     person,
+                                                                    end_date,
                                                                 } = item;
+                                                                const currentDate = new Date();
+                                                                const endDate = new Date(end_date);
+                                                                console.log();
                                                                 return (
                                                                     <Draggable
                                                                         key={
@@ -538,12 +610,15 @@ const KanbanBoard = () => {
                                                                             return (
                                                                                 <div
                                                                                     onClick={() => {
-                                                                                        handleModalEdit(item)
+                                                                                        handleModalEdit(
+                                                                                            item
+                                                                                        );
                                                                                     }}
-                                                                                    className={`flex rounded-md ${snapshot.isDragging
+                                                                                    className={`flex rounded-md w-full ${
+                                                                                        snapshot.isDragging
                                                                                             ? 'rotate-2'
                                                                                             : 'rotate-0'
-                                                                                        }`}
+                                                                                    }`}
                                                                                     ref={
                                                                                         provided.innerRef
                                                                                     }
@@ -570,23 +645,32 @@ const KanbanBoard = () => {
                                                                                             .style,
                                                                                     }}
                                                                                 >
-                                                                                    <div className='flex flex-col'>
+                                                                                    <div className='flex flex-col w-full'>
                                                                                         <p className='mb-2'>
-                                                                                            {
-                                                                                                name
-                                                                                            }
+                                                                                            {name}
                                                                                         </p>
-                                                                                        {person && <div
-                                                                                            className={`px-2 py-1 font-light text-xs rounded-md w-fit`}
-                                                                                            style={{
-                                                                                                backgroundColor:
-                                                                                                    snapshot.isDragging ? 'white' : color,
-                                                                                            }}
-                                                                                        >
-                                                                                            {
-                                                                                                person
-                                                                                            }
-                                                                                        </div>}
+                                                                                        <div className='flex w-full justify-between items-center'>
+                                                                                            <div>
+                                                                                                {person && (
+                                                                                                    <div
+                                                                                                        className={`px-2 py-1 font-light text-xs rounded-md w-fit`}
+                                                                                                        style={{
+                                                                                                            backgroundColor:
+                                                                                                                snapshot.isDragging
+                                                                                                                    ? 'white'
+                                                                                                                    : color,
+                                                                                                        }}
+                                                                                                    >
+                                                                                                        {person}
+                                                                                                    </div>
+                                                                                                )}
+                                                                                            </div>
+                                                                                            <div className='self-end w-fit'>
+                                                                                                { (endDate < currentDate) && (<Tag color={'red'} style={{padding:'5px 10px'}} bordered={false}>
+                                                                                                    Overdue
+                                                                                                </Tag>)}
+                                                                                            </div>
+                                                                                        </div>
                                                                                     </div>
                                                                                 </div>
                                                                             );
