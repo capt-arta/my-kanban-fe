@@ -84,7 +84,7 @@ const KanbanBoard = () => {
     // console.log('kanban online');
     const [columns, setColumns] = useState(columnsFromBackend);
     const [loading, setLoading] = useState(true);
-    const [detailTask, setDetailTask] = useState(null);
+    const [detailTask, setDetailTask] = useState({});
     const [modalCreateOpen, setModalCreateOpen] = useState(false);
     const [modalEditOpen, setModalEditOpen] = useState(false);
     const [editMode, setEditMode] = useState(false);
@@ -130,7 +130,7 @@ const KanbanBoard = () => {
         setModalCreateOpen(false);
         setModalEditOpen(false);
         setEditMode(false);
-        setDetailTask(null);
+        setDetailTask({});
         form.resetFields();
     };
 
@@ -156,18 +156,18 @@ const KanbanBoard = () => {
                 `http://127.0.0.1:8000/api/task/${val.id}`
             );
             const fetchedDetailTask = response.data.data;
-            console.log(
-                {
-                    date: [
-                        dayjs(fetchedDetailTask.start_date),
-                        dayjs(fetchedDetailTask.end_date),
-                    ],
-                    description: fetchedDetailTask.description,
-                    name: fetchedDetailTask.name,
-                    person: fetchedDetailTask.person,
-                },
-                'response'
-            );
+            // console.log(
+            //     {
+            //         date: [
+            //             dayjs(fetchedDetailTask.start_date),
+            //             dayjs(fetchedDetailTask.end_date),
+            //         ],
+            //         description: fetchedDetailTask.description,
+            //         name: fetchedDetailTask.name,
+            //         person: fetchedDetailTask.person,
+            //     },
+            //     'response'
+            // );
             form.setFieldsValue({
                 date: [
                     dayjs(fetchedDetailTask.start_date),
@@ -188,11 +188,12 @@ const KanbanBoard = () => {
     };
 
     const createTaskData = async (data) => {
+        console.log(data, 'values');
         setLoading(true);
         try {
             await axios.post('http://127.0.0.1:8000/api/task', data);
+            await fetchData();
             setTimeout(() => {
-                fetchData();
                 setLoading(false);
             }, 500);
             message.success('Data Created!');
@@ -235,7 +236,7 @@ const KanbanBoard = () => {
             await axios.delete(`http://127.0.0.1:8000/api/task/${id}`);
             setTimeout(() => {
                 fetchData();
-                handleCancel;
+                handleCancel();
                 setLoading(false);
             }, 500);
             message.info('Data Deleted!');
@@ -257,15 +258,17 @@ const KanbanBoard = () => {
         delete finalData.date;
         editTaskData(finalData);
         setTimeout(() => {
-            setModalEditOpen(false);
-            setEditMode(false);
-            setDetailTask(null);
-            form.resetFields();
+            // setModalEditOpen(false);
+            // setEditMode(false);
+            // setDetailTask({});
+            // form.resetFields();
+            handleCancel();
             fetchData();
         }, 500);
     };
 
     const handleCreateTask = (values) => {
+        console.log({values});
         const [startDate, endDate] = values.date;
 
         const formattedStartDate = moment(startDate.toISOString()).format(
@@ -309,7 +312,7 @@ const KanbanBoard = () => {
                 handleDeleteTask(id);
             },
             onCancel() {
-                handleCancel;
+                handleCancel();
             },
         });
     };
@@ -456,8 +459,9 @@ const KanbanBoard = () => {
                     open={modalEditOpen}
                     onCancel={handleCancel}
                     footer={null}
+                    forceRender
                 >
-                    <Form
+                    {modalEditOpen && <Form
                         form={form}
                         layout='vertical'
                         onFinish={handleEditTask}
@@ -530,10 +534,10 @@ const KanbanBoard = () => {
                                 )}
                             </div>
                         </div>
-                    </Form>
+                    </Form>}
                 </Modal>
             </div>
-            <div className='flex overflow-auto gap-4'>
+            <div className='flex gap-4'>
                 <DragDropContext
                     onDragEnd={(result) =>
                         onDragEnd(result, columns, setColumns)
@@ -576,7 +580,7 @@ const KanbanBoard = () => {
                                                                     : '#ebecf0',
                                                             width: 250,
                                                             height: '60vh',
-                                                            // overflow: 'auto'
+                                                            overflow: 'auto'
                                                         }}
                                                         className='p-2'
                                                     >
@@ -590,7 +594,6 @@ const KanbanBoard = () => {
                                                                 } = item;
                                                                 const currentDate = new Date();
                                                                 const endDate = new Date(end_date);
-                                                                console.log();
                                                                 return (
                                                                     <Draggable
                                                                         key={
