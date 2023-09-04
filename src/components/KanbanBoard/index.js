@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import Loading from '../Loading';
 import axios from 'axios';
-import { Button, Modal, Form, Input, DatePicker, message, Tag } from 'antd';
+import { Button, Modal, Form, Input, DatePicker, message, Tag, Slider } from 'antd';
 import { ExclamationCircleFilled } from '@ant-design/icons';
 import moment from 'moment/moment';
 import dayjs from 'dayjs';
@@ -176,6 +176,7 @@ const KanbanBoard = () => {
                 description: fetchedDetailTask.description,
                 name: fetchedDetailTask.name,
                 person: fetchedDetailTask.person,
+                progress: fetchedDetailTask.progress || 0,
             });
             setDetailTask(fetchedDetailTask);
             setModalEditOpen(true);
@@ -186,6 +187,8 @@ const KanbanBoard = () => {
             setLoading(false);
         }
     };
+
+    console.log({detailTask});
 
     const createTaskData = async (data) => {
         console.log(data, 'values');
@@ -256,6 +259,7 @@ const KanbanBoard = () => {
             end_date: endDate,
         };
         delete finalData.date;
+        console.log({finalData});
         editTaskData(finalData);
         setTimeout(() => {
             // setModalEditOpen(false);
@@ -485,6 +489,9 @@ const KanbanBoard = () => {
                                 className='w-full'
                             />
                         </Form.Item>
+                        { (detailTask?.status === 'IN PROGRESS' || detailTask?.status === 'DONE') ? (<Form.Item name='progress' label='Progress'>
+                            <Slider disabled={!editMode} />
+                        </Form.Item>) : null}
 
                         <div className='pt-6 flex gap-4 justify-between h-fit'>
                             <div>

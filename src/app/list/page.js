@@ -46,11 +46,22 @@ const List = () => {
       title: 'Description',
       dataIndex: 'description',
       key: 'description',
+      render: (description)=> {
+        return description || '-'
+      }
     },
     {
       title: 'Person',
       dataIndex: 'person',
       key: 'person',
+    },
+    {
+      title: 'Progress',
+      dataIndex: 'progress',
+      key: 'progress',
+      render: (progress)=> {
+        return (progress || 0) + "%"
+      }
     },
     {
       title: 'Start Date',

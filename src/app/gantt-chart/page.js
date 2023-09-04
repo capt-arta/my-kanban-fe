@@ -46,7 +46,7 @@ const GanttChart = () => {
       start: new Date(startDate.year, startDate.month, startDate.day),
       end: new Date(endDate.year, endDate.month, endDate.day),
       type: 'task',
-      progress: 100,
+      progress: task.progress || 0,
       isDisabled: true,
       styles: { progressColor: '#1677ff', progressSelectedColor: '#8ebdff', todayColor: "#f8b444" },
     }
